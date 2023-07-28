@@ -1,0 +1,62 @@
+#!/usr/bin/bash
+# 
+# Autor: Hilbert Nunes
+#
+# ------------------------------------------------------------------------ #
+#  Este programa irá alterar a variável HOST e HOSTNAME
+#
+#  This program will read and fit your input on a pattern, then update the file
+#  /etc/hosts and /etc/ hostname
+# ------------------------------------------------------------------------ #
+# Testado em:
+#   bash 5.0.17
+
+while true; do
+
+    echo -e "\n"
+
+    # Ask for store acronym
+    read -p $'\e[32;1mDigite a sigla da loja (XXX): \e[0m' store_acronym
+
+    echo -e "\n"
+
+    # Convert store acronym to lowercase
+    store_acronym=$(echo "$store_acronym" | tr '[:upper:]' '[:lower:]')
+
+    # Ask for store numeration
+    read -p $'\e[32;1mDigite a numeração: \e[0m' dsk_number
+
+    echo -e "\n"
+
+    # Generate new hostname
+    new_hostname="xxx${store_acronym}xxx${dsk_number}"
+
+    # Generate new hostname
+    echo -e "\033[36mNovo hostname: $new_hostname"
+
+    echo -e "\n"
+
+    # Ask the user to continue or try again
+    read -p $'\e[31;1;5mDeseja continuar ? (y/n): \e[0m' choice
+
+    echo -e "\n"
+
+    if [[ $choice =~ ^[Yy]$ ]]; then
+        # Create backup files with unique names
+        backup_hostname="/etc/hostname.OLD.$(date +%Y%m%d%H%M%S)"
+        backup_hosts="/etc/hosts.OLD.$(date +%Y%m%d%H%M%S)"
+	    sudo cp /etc/hostname "$backup_hostname"
+        sudo cp /etc/hosts "$backup_hosts"
+	
+        # Update hostname file        
+        sudo bash -c "echo '$new_hostname' > /etc/hostname"
+
+        # Update hostname file
+        sudo sed -i "s/${HOSTNAME}/$new_hostname/g" /etc/hosts
+
+        sudo hostname "$new_hostname"
+
+        echo -e "\033[32mArquivos hosts e hostname foram atualizados com sucesso!"
+        break
+    fi
+done
